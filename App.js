@@ -1,19 +1,84 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, Button, ScrollView, FlatList, ToastAndroid, Keyboard } from 'react-native';
+
+import ContatoItem from './components/ContactItem';
+import ContatoInput from './components/ContactInput';
 
 export default function App() {
+
+  const [contatos, setContatos] = useState([]);
+
+  const [contadorContatos, setContadorContatos] = useState(0);
+
+  const adicionarContato = (nome, telefone) => {
+    if (nome === '' || telefone === '') {
+      ToastAndroid.show("Insira nome e telefone !", ToastAndroid.SHORT)
+    } else {
+      setContatos((contatos) => {
+        setContadorContatos(contadorContatos + 1);
+        return [
+          {
+            key: contadorContatos.toString()
+            , nome: nome
+            , telefone: telefone
+          },
+          ...contatos];
+      });
+      console.log('Nome: ' + nome + ' --> ' + 'Telefone: ' + telefone);
+      ToastAndroid.show("Contato adicionado com sucesso !", ToastAndroid.SHORT)
+      Keyboard.dismiss();
+    }
+  }
+
+  const apagarContatos = () => {
+    setContatos([]);
+  }
+
+  const removerContato = (keyASerRemovida) => {
+    setContatos(contatos => {
+      return contatos.filter((contato) => {
+        return contato.key !== keyASerRemovida
+      })
+    })
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+    <View style={styles.telaPricipalView}>
+
+      <ContatoInput
+        onAdicionarContato={adicionarContato}
+        onApagarTudo={apagarContatos}
+      />
+
+      <View>
+        <FlatList
+          data={contatos}
+          renderItem={
+            contato => (
+              <ContatoItem
+                contato={contato.item}
+                onDelete={removerContato}
+              />
+            )
+          }
+        />
+      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+const styles = StyleSheet.create({  
+  telaPricipalView: {
+    padding: 50
+  },
+  contatoView: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 12
+  },  
+  botao: {
+    width: '80%',
+    marginTop: 8
   },
 });
